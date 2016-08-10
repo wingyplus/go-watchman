@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"net"
+	"os/exec"
 )
 
 type Trigger struct {
@@ -21,13 +22,30 @@ func (c *Client) Close() {
 }
 
 func Connect() *Client {
-	conn, err := net.Dial("unix", "/usr/local/var/run/watchman/wingyplus-state/sock")
+	sockname, err := getSockname()
+	if err != nil {
+		panic(err)
+	}
+	conn, err := net.Dial("unix", sockname)
 	if err != nil {
 		panic(err)
 	}
 	return &Client{
 		conn: conn,
 	}
+}
+
+func getSockname() (string, error) {
+	var sock struct {
+		Version  string `json:"version"`
+		Sockname string `json:"sockname"`
+	}
+	out, err := exec.Command("watchman", "get-sockname").Output()
+	if err != nil {
+		return "", err
+	}
+	json.Unmarshal(out, &sock)
+	return sock.Sockname, nil
 }
 
 func (c *Client) Trigger(rootpath string, trigger Trigger) {
