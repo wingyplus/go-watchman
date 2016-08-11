@@ -16,7 +16,7 @@ func TestTrigger(t *testing.T) {
 
 	client.Trigger(wd, Trigger{
 		Name:       "gotrigger",
-		Expression: []string{"pcre", ".go"},
+		Expression: Pcre(".go"),
 		Command:    []string{"go", "test"},
 	})
 
@@ -42,12 +42,12 @@ func TestTrigger_AlreadyDefined(t *testing.T) {
 
 	client.Trigger(wd, Trigger{
 		Name:       "gotrigger",
-		Expression: []string{"pcre", ".go"},
+		Expression: Pcre(".go"),
 		Command:    []string{"go", "test"},
 	})
 	result, _ := client.Trigger(wd, Trigger{
 		Name:       "gotrigger",
-		Expression: []string{"pcre", ".go"},
+		Expression: Pcre(".go"),
 		Command:    []string{"go", "test"},
 	})
 
