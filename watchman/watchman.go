@@ -2,7 +2,6 @@ package watchman
 
 import (
 	"encoding/json"
-	"log"
 	"net"
 	"os/exec"
 )
@@ -48,9 +47,18 @@ func getSockname() (string, error) {
 	return sock.Sockname, nil
 }
 
-func (c *Client) Trigger(rootpath string, trigger Trigger) {
+type TriggerResult struct {
+	Version     string `json:"version"`
+	TriggerID   string `json:"triggerid"`
+	Disposition string `json:"disposition"`
+}
+
+func (c *Client) Trigger(rootpath string, trigger Trigger) (*TriggerResult, error) {
 	err := json.NewEncoder(c.conn).Encode([]interface{}{"trigger", rootpath, trigger})
 	if err != nil {
-		log.Println(err)
+		return nil, err
 	}
+	var result TriggerResult
+	err = json.NewDecoder(c.conn).Decode(&result)
+	return &result, err
 }
